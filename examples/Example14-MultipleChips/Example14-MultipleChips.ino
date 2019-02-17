@@ -1,25 +1,15 @@
 /*
-  Using the BNO080 IMU
-  By: Nathan Seidle
-  SparkFun Electronics
-  Date: December 21st, 2017
-  License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
+  Minimum NOT working example.
 
-  Feel like supporting our work? Buy a board from SparkFun!
-  https://www.sparkfun.com/products/14586
-
-  This example shows how to output accelerometer values
-
-  Hardware Connections:
-  Attach the Qwiic Shield to your Arduino/Photon/ESP32 or other
-  Plug the sensor onto the shield
-  Serial.print it out at 9600 baud to serial monitor.
+  This example should show how to output accelerometer values with two
+  BNO080 on the same bus.
 */
 
+//This should be a library version with disabled internal pull-ups when using 5V hardware
 #include <Wire.h>
 
 #include "SparkFun_BNO080_Arduino_Library.h"
-BNO080 myIMU;
+BNO080 myIMU0, myIMU1;
 
 void setup()
 {
@@ -29,32 +19,47 @@ void setup()
 
   Wire.begin();
 
-  myIMU.begin();
+  myIMU0.begin();
+  myIMU1.begin(0x4A);
 
   Wire.setClock(400000); //Increase I2C data rate to 400kHz
 
-  myIMU.enableAccelerometer(50); //Send data update every 50ms
+  myIMU0.enableAccelerometer(50); //Send data update every 50ms
+  myIMU1.enableAccelerometer(50); //Send data update every 50ms
 
   Serial.println(F("Accelerometer enabled"));
-  Serial.println(F("Output in form x, y, z, in m/s^2"));
+  Serial.println(F("Output in form x y z in m/s^2"));
 }
 
 void loop()
 {
-  //Look for reports from the IMU
-  if (myIMU.dataAvailable() == true)
+  //Look for reports from the IMUs
+  if (myIMU0.dataAvailable() == true)
   {
-    float x = myIMU.getAccelX();
-    float y = myIMU.getAccelY();
-    float z = myIMU.getAccelZ();
+    float x = myIMU0.getAccelX();
+    float y = myIMU0.getAccelY();
+    float z = myIMU0.getAccelZ();
 
+    Serial.print(F("IMU0:\t"));
     Serial.print(x, 2);
-    Serial.print(F(","));
+    Serial.print('\t');
     Serial.print(y, 2);
-    Serial.print(F(","));
+    Serial.print('\t');
     Serial.print(z, 2);
-    Serial.print(F(","));
+    Serial.print('\n');
+  }
+  if (myIMU1.dataAvailable() == true)
+  {
+    float x = myIMU1.getAccelX();
+    float y = myIMU1.getAccelY();
+    float z = myIMU1.getAccelZ();
 
-    Serial.println();
+    Serial.print(F("IMU1:\t"));
+    Serial.print(x, 2);
+    Serial.print('\t');
+    Serial.print(y, 2);
+    Serial.print('\t');
+    Serial.print(z, 2);
+    Serial.print('\n');
   }
 }
